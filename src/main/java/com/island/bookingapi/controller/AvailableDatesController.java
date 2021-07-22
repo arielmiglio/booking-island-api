@@ -41,13 +41,13 @@ public class AvailableDatesController {
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody	
 
-	public ResponseEntity<AvailabilityResponse> getAvailableDates(
+	public AvailabilityResponse getAvailableDates(
             @Future @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @Future @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
 		log.info("Finding availables dates between {} and {}", from, to);
         to = Optional.ofNullable(to).orElse(from.plusMonths(1));
         List<LocalDate> availableDates = this.availableDatesServices.getAvailableDates(from, to);
-        return ResponseEntity.status(HttpStatus.OK).body(AvailabilityResponse.builder().from(from).to(to).availableDates(availableDates).build());
+        return AvailabilityResponse.builder().from(from).to(to).availableDates(availableDates).build();
 	}
 
 }
