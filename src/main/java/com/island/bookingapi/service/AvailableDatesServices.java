@@ -7,15 +7,13 @@ import javax.validation.constraints.Future;
 
 public interface AvailableDatesServices {
 
-	/**
-	 * Return the available dates between from and to parameters
+    /**
+     * Return the available dates between from and to parameters
      *
      * @param from Arrival day
      * @param to   Departure day
      * @return List<LocalDate> the available dates
      */
-	List<LocalDate> getAvailableDates(@Future LocalDate from, @Future LocalDate to);
-	
-	
+    List<LocalDate> getAvailableDates(@Future LocalDate from, @Future LocalDate to);
 
 }

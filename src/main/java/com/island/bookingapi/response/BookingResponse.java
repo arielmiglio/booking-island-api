@@ -13,36 +13,37 @@ import lombok.Getter;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class BookingResponse {
 
-	private Long bookingId;
+    private Long bookingId;
 
-	private String fullName;
+    private String fullName;
 
-	private String userEmail;
+    private String userEmail;
 
-	private LocalDate arrivalDate;
+    private LocalDate arrivalDate;
 
-	private LocalDate departureDate;
+    private LocalDate departureDate;
 
-	private LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
-	private LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
 
-	private BookingStatus bookingStatus;
+    private BookingStatus bookingStatus;
 
-	/**
+    /**
      * Creates a {@link BookingResponse} from a {@link Booking} instance
+     * 
      * @param newGame
      */
-	public BookingResponse(Booking booking) {
-		this.bookingId = booking.getId();
-		this.fullName = booking.getFullName();
-		this.userEmail = booking.getUserEmail();
-		this.arrivalDate = booking.getArrivalDate();
-		this.departureDate = booking.getDepartureDate();
-		this.createdAt = booking.getCreatedAt();
-		this.updatedAt = booking.getUpdatedAt();
-		this.bookingStatus = booking.getBookingStatus();
+    public BookingResponse(Booking booking) {
+	this.bookingId = booking.getId();
+	this.fullName = booking.getFullName();
+	this.userEmail = booking.getUserEmail();
+	this.arrivalDate = booking.getArrivalDate();
+	this.departureDate = booking.getDepartureDate();
+	this.createdAt = booking.getCreatedAt();
+	this.updatedAt = booking.getUpdatedAt();
+	this.bookingStatus = booking.getBookingStatus();
 
-	}
+    }
 
 }

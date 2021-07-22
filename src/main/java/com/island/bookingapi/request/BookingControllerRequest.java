@@ -1,15 +1,16 @@
 package com.island.bookingapi.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.island.bookingapi.validation.ValidateDateRange;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import java.time.LocalDate;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.island.bookingapi.validation.ValidateDateRange;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -28,6 +29,5 @@ public class BookingControllerRequest {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate departureDate;
-
 
 }

@@ -27,46 +27,43 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Booking {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
-	@NotBlank
-	@Column(length = 300)
-	private String fullName;
-	
-	@Email
-	@NotBlank
-	private String userEmail;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	private LocalDate arrivalDate;
+    @NotBlank
+    @Column(length = 300)
+    private String fullName;
 
-	private LocalDate departureDate;
+    @Email
+    @NotBlank
+    private String userEmail;
 
-	@CreationTimestamp
-	private LocalDateTime createdAt;
+    private LocalDate arrivalDate;
 
-	@UpdateTimestamp
-	private LocalDateTime updatedAt;
-	
-	private BookingStatus bookingStatus;
-	
-	
-	
-	public Booking(String name, String email, LocalDate arribalDate, LocalDate departureDate) {
-		this.fullName = name;
-		this.userEmail = email;
-		this.arrivalDate = arribalDate;
-		this.departureDate = departureDate;
-		this.bookingStatus = BookingStatus.ACTIVE;
+    private LocalDate departureDate;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
+    private BookingStatus bookingStatus;
+
+    public Booking(String name, String email, LocalDate arribalDate, LocalDate departureDate) {
+	this.fullName = name;
+	this.userEmail = email;
+	this.arrivalDate = arribalDate;
+	this.departureDate = departureDate;
+	this.bookingStatus = BookingStatus.ACTIVE;
+    }
+
+    public void cancel() {
+	if (BookingStatus.ACTIVE != this.bookingStatus) {
+	    throw new AlreadyCancelledBookingException();
 	}
-	
-	public void cancel() {
-		if(BookingStatus.ACTIVE != this.bookingStatus) {
-			throw new AlreadyCancelledBookingException(); 
-		}
-		this.bookingStatus = BookingStatus.CANCELLED;
-	}
-	
-	
+	this.bookingStatus = BookingStatus.CANCELLED;
+    }
+
 }

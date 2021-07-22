@@ -1,13 +1,12 @@
 package com.island.bookingapi.model;
 
 public enum BookingStatus {
-    ACTIVE(1),
-    CANCELLED(0);
+    ACTIVE(1), CANCELLED(0);
 
     Integer id;
 
     BookingStatus(Integer id) {
-        this.id = id;
+	this.id = id;
     }
 
 }

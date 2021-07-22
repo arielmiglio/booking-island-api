@@ -8,9 +8,7 @@ import javax.validation.constraints.Future;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,22 +30,22 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/availability")
 @Slf4j
 public class AvailableDatesController {
-	
-	@Autowired
-	private AvailableDatesServices availableDatesServices;
-	
-	@Operation(summary = "Search available dates between the sended dates")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "When find dates") })
-	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody	
 
-	public AvailabilityResponse getAvailableDates(
-            @Future @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @Future @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-		log.info("Finding availables dates between {} and {}", from, to);
-        to = Optional.ofNullable(to).orElse(from.plusMonths(1));
-        List<LocalDate> availableDates = this.availableDatesServices.getAvailableDates(from, to);
-        return AvailabilityResponse.builder().from(from).to(to).availableDates(availableDates).build();
-	}
+    @Autowired
+    private AvailableDatesServices availableDatesServices;
+
+    @Operation(summary = "Search available dates between the sended dates")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "When find dates") })
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+
+    public AvailabilityResponse getAvailableDates(
+	    @Future @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+	    @Future @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+	log.info("Finding availables dates between {} and {}", from, to);
+	to = Optional.ofNullable(to).orElse(from.plusMonths(1));
+	List<LocalDate> availableDates = this.availableDatesServices.getAvailableDates(from, to);
+	return AvailabilityResponse.builder().from(from).to(to).availableDates(availableDates).build();
+    }
 
 }

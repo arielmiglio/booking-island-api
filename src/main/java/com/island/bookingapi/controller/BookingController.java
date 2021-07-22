@@ -36,56 +36,52 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BookingController {
 
-	@Autowired
-	private BookingService bookingService;
+    @Autowired
+    private BookingService bookingService;
 
-	@Operation(summary = "Retrieve a whole booking")
-	@ApiResponses(value = { @ApiResponse(responseCode = "404", description = "id not found") })
-	@GetMapping(value = "/booking/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody	
-	public ResponseEntity<BookingResponse> getBooking(@PathVariable @NotNull long id) {
-       
-		Booking booking = this.bookingService.getBooking(id);
-        log.info("Booking for user {}", booking.getFullName());
-        return ResponseEntity.status(HttpStatus.OK).body(new BookingResponse(booking));
+    @Operation(summary = "Retrieve a whole booking")
+    @ApiResponses(value = { @ApiResponse(responseCode = "404", description = "id not found") })
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<BookingResponse> getBooking(@PathVariable @NotNull long id) {
+
+	Booking booking = this.bookingService.getBooking(id);
+	log.info("Booking for user {}", booking.getFullName());
+	return ResponseEntity.status(HttpStatus.OK).body(new BookingResponse(booking));
     }
 
-	
-	
-	
-	@Operation(summary = "Create a new Booking with the provided details")
-	@ApiResponses(value = { @ApiResponse(responseCode = "400", description = "When booking dates are already booked") })
-    @PostMapping(value = "/booking", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Create a new Booking with the provided details")
+    @ApiResponses(value = { @ApiResponse(responseCode = "400", description = "When booking dates are already booked") })
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<BookingResponse> createBooking(@RequestBody @Valid BookingControllerRequest request) {
-        Booking newBooking = bookingService.create(request);
+	Booking newBooking = bookingService.create(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(new BookingResponse(newBooking));
+	return ResponseEntity.status(HttpStatus.CREATED).body(new BookingResponse(newBooking));
     }
-	
-	
-	@Operation(summary = "Cancel the Booking related with the recibed id")
-	@ApiResponses(value = { @ApiResponse(responseCode = "404", description = "bookingId not found"),
-							@ApiResponse(responseCode = "400", description = "Invalid booking status (other than ACTIVE")})
-	@DeleteMapping(value = "/{bookingId}")
+
+    @Operation(summary = "Cancel the Booking related with the recibed id")
+    @ApiResponses(value = { @ApiResponse(responseCode = "404", description = "bookingId not found"),
+	    @ApiResponse(responseCode = "400", description = "Invalid booking status (other than ACTIVE") })
+    @DeleteMapping(value = "/{bookingId}")
     public ResponseEntity<BookingResponse> cancelBooking(@PathVariable Long bookingId) {
-        Booking booking = this.bookingService.cancelBooking(bookingId);
-        return ResponseEntity.status(HttpStatus.OK).body(new BookingResponse(booking));
+	Booking booking = this.bookingService.cancelBooking(bookingId);
+	return ResponseEntity.status(HttpStatus.OK).body(new BookingResponse(booking));
     }
 
-	@Operation(summary = "Updates a Booking with the provided id")
-	@ApiResponses(value = { @ApiResponse(responseCode = "404", description = "bookingId not found"),
-							@ApiResponse(responseCode = "400", description = "Invalid booking status (other than ACTIVE)"),
-							@ApiResponse(responseCode = "400", description = "If the date range has unavailable dates"),})
+    @Operation(summary = "Updates a Booking with the provided id")
+    @ApiResponses(value = { @ApiResponse(responseCode = "404", description = "bookingId not found"),
+	    @ApiResponse(responseCode = "400", description = "Invalid booking status (other than ACTIVE)"),
+	    @ApiResponse(responseCode = "400", description = "If the date range has unavailable dates"), })
     @PatchMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<BookingResponse> updateBooking(@RequestBody @Valid BookingControllerRequest request, @PathVariable long id){
-		Booking booking = this.bookingService.updateBooking(request, id);
-		
-		return ResponseEntity.status(HttpStatus.OK).body(new BookingResponse(booking));
-	}
-	
+    public ResponseEntity<BookingResponse> updateBooking(@RequestBody @Valid BookingControllerRequest request,
+	    @PathVariable long id) {
+	Booking booking = this.bookingService.updateBooking(request, id);
+
+	return ResponseEntity.status(HttpStatus.OK).body(new BookingResponse(booking));
+    }
 
 }

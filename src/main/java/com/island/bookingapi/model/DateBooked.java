@@ -16,25 +16,26 @@ import lombok.Setter;
  * 
  * @author miglioa
  *
- * This class is used to instance each date that has concrete bookings.
- * Being the ID the only attribute cannot be able to persist two instances with in the same day
- * It become the class a constraint to avoid insert duplicated bookings days.
- *  
+ *         This class is used to instance each date that has concrete bookings.
+ *         Being the ID the only attribute cannot be able to persist two
+ *         instances with in the same day It become the class a constraint to
+ *         avoid insert duplicated bookings days.
+ * 
  */
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 public class DateBooked {
-	
-	@Id
+
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true)
     private LocalDate day;
 
     public DateBooked(LocalDate date) {
-    	this.day = date;
+	this.day = date;
     }
 
 }
