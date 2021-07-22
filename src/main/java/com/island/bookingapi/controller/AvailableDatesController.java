@@ -40,10 +40,11 @@ public class AvailableDatesController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "When find dates") })
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody	
+
 	public ResponseEntity<AvailabilityResponse> getAvailableDates(
             @Future @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @Future @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-        from = Optional.ofNullable(from).orElse(LocalDate.now().plusDays(1));
+		log.info("Finding availables dates between {} and {}", from, to);
         to = Optional.ofNullable(to).orElse(from.plusMonths(1));
         List<LocalDate> availableDates = this.availableDatesServices.getAvailableDates(from, to);
         return ResponseEntity.status(HttpStatus.OK).body(AvailabilityResponse.builder().from(from).to(to).availableDates(availableDates).build());
