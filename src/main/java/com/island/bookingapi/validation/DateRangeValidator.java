@@ -11,8 +11,7 @@ public class DateRangeValidator implements ConstraintValidator<ValidateDateRange
     private String arrivalDate;
     private String departureDate;
     private static final Integer MAX_STAY = 3;
-    private static final Integer BOOKING_ANTICIPATION_DAYS = 30;
-
+    private static final Integer BOOKING_ANTICIPATION_MONTHS = 1;
     @Override
     public void initialize(final ValidateDateRange constraintAnnotation) {
         this.arrivalDate = constraintAnnotation.arrivalDate();
@@ -62,7 +61,7 @@ public class DateRangeValidator implements ConstraintValidator<ValidateDateRange
             context.buildConstraintViolationWithTemplate("Arrival date must be greater today").addConstraintViolation();
             return false;
         }
-        LocalDate limitLocalDate = now.plusDays(BOOKING_ANTICIPATION_DAYS);
+        LocalDate limitLocalDate = now.plusMonths(BOOKING_ANTICIPATION_MONTHS);
         if (limitLocalDate.compareTo(arrival) < 0) {
 
             context.disableDefaultConstraintViolation();

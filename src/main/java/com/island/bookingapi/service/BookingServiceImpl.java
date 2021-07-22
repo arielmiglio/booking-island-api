@@ -2,6 +2,7 @@ package com.island.bookingapi.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.island.bookingapi.exception.BookingNotFoundException;
+import com.island.bookingapi.exception.DeniedBookingOperationException;
 import com.island.bookingapi.model.Booking;
 import com.island.bookingapi.model.BookingStatus;
 import com.island.bookingapi.model.DateBooked;
@@ -75,7 +77,7 @@ public class BookingServiceImpl implements BookingService {
 	@Override
 	@Transactional
 	public Booking cancelBooking(Long bookingId) {
-		Booking booking = this.bookingRepository.getById(bookingId);
+		Booking booking = this.bookingRepository.findById(bookingId).orElseThrow(BookingNotFoundException::new);
 		List<LocalDate> bookingDates = booking.getArrivalDate().datesUntil(booking.getDepartureDate()).collect(Collectors.toList());
         
         booking.cancel();
@@ -89,16 +91,52 @@ public class BookingServiceImpl implements BookingService {
 	@Override
 	@Transactional
 	public Booking updateBooking(@Valid BookingControllerRequest request, long id) {
-		Booking booking = this.bookingRepository.getById(id);
+		Booking booking = this.bookingRepository.findById(id).orElseThrow(BookingNotFoundException::new);
 		
-		return null;
+		if(BookingStatus.ACTIVE != booking.getBookingStatus()) {
+			throw new DeniedBookingOperationException(booking.getBookingStatus().toString());
+		}
+		
+		this.workWithDates(booking, request.getArrivalDate(), request.getDepartureDate());
+		booking.setFullName(request.getFullName());
+		booking.setUserEmail(request.getUserEmail());
+		
+		this.bookingRepository.save(booking);
+		return booking;
+	}
+
+	/**
+	 * Calculate the difference between the persisted dates and new ones.
+	 * 
+	 * The intersection is used to calculate new dates to insert and old ones to delete from the database.
+	 * 
+	 * @param booking
+	 * @param arrivalDate
+	 * @param departureDate
+	 */
+
+	private void workWithDates(Booking booking, LocalDate newArrivalDate, LocalDate newDepartureDate) {
+
+		if(booking.getArrivalDate().isEqual(newArrivalDate) && booking.getDepartureDate().isEqual(newDepartureDate)) {
+			return;	//If the dates didn't change, is nothing to do
+		}
+		
+		List<LocalDate> previousBookedDates = booking.getArrivalDate().datesUntil(booking.getDepartureDate()).collect(Collectors.toList());
+		List<LocalDate> newBookingDates = newArrivalDate.datesUntil(newDepartureDate).collect(Collectors.toList());
+	
+		//Non existing dates in the original booking 
+		List<LocalDate> toSave = newBookingDates.stream().filter(x -> !previousBookedDates.contains(x)).collect(Collectors.toList());
+		List<DateBooked> datesToSave = toSave.stream().map(DateBooked::new).collect(Collectors.toList());
+		this.dateBookedRepository.saveAll(datesToSave);
+		
+		//Dates previously saved that I have to delete
+		List<LocalDate> toDelete = previousBookedDates.stream().filter(x -> !newBookingDates.contains(x)).collect(Collectors.toList());
+		this.dateBookedRepository.deleteByDayIn(toDelete);
+		
+		booking.setArrivalDate(newArrivalDate);
+		booking.setDepartureDate(newDepartureDate);
 	}
 	
-	
-
-	
-	
-    
-    
-
 }
+
+

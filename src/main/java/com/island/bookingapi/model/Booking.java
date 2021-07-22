@@ -68,13 +68,5 @@ public class Booking {
 		this.bookingStatus = BookingStatus.CANCELLED;
 	}
 	
-	public void update(LocalDate arribalDate, LocalDate departureDate) {
-		if(BookingStatus.ACTIVE != this.bookingStatus) {
-			throw new DeniedBookingOperationException(this.bookingStatus.toString());
-		}
-		this.setArrivalDate(arribalDate);
-		this.setDepartureDate(departureDate);		
-	}
-	
 	
 }
