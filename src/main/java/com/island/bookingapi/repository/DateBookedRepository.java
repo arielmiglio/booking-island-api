@@ -12,8 +12,7 @@ import com.island.bookingapi.model.DateBooked;
 public interface DateBookedRepository extends JpaRepository<DateBooked, Long> {
 
     @Query("SELECT d.day from DateBooked d where d.day between :initialDate and :endDate order by d.day asc")
-    List<LocalDate> getOrderedBookedDates(@Param("initialDate") LocalDate initialDate,
-	    @Param("endDate") LocalDate endDate);
+    List<LocalDate> getOrderedBookedDates(@Param("initialDate") LocalDate initialDate, @Param("endDate") LocalDate endDate);
 
     void findByDayBetween(LocalDate initialDate, LocalDate endDate);
 

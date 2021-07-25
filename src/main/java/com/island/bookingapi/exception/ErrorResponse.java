@@ -2,8 +2,6 @@ package com.island.bookingapi.exception;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.Builder;
@@ -18,6 +16,6 @@ public class ErrorResponse {
 
     private String message;
     private int errorCode;
-    private HttpStatus status;
-    private List<String> errors;
+    private List<String> messageColection;
+    
 }

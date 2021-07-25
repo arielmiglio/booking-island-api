@@ -1,8 +1,12 @@
 package com.island.bookingapi.service;
 
+import java.time.LocalDate;
+
 import javax.validation.Valid;
 
+import com.island.bookingapi.exception.AlreadyCancelledBookingException;
 import com.island.bookingapi.exception.BookingNotFoundException;
+import com.island.bookingapi.exception.DeniedBookingOperationException;
 import com.island.bookingapi.model.Booking;
 import com.island.bookingapi.request.BookingControllerRequest;
 
@@ -24,15 +28,18 @@ public interface BookingService {
      * 
      * @param request
      * @return The created {@link Booking}
+     * @throws NotAvailablesDatesException when dates are not available to booking
      */
-    Booking create(@Valid BookingControllerRequest request);
+    Booking createBooking(@Valid BookingControllerRequest request);
+    Booking createBooking(String fullName, String userEmail, LocalDate arrivalDate, LocalDate departureDate) ;
 
     /**
      * Cancel a booking changing its status to CANCELLED
      * 
      * @param bookingId the booking ID to be deleted
      * @return The deleted {@link Booking} with the given id
-     * @throws BookingNotFoundException if the id is not found in the DB
+     * @throws BookingNotFoundException when the id is not found in the DB
+     * @throws AlreadyCancelledBookingException when the Booking was canceled previously
      */
     Booking cancelBooking(Long bookingId);
 
@@ -43,7 +50,9 @@ public interface BookingService {
      * @param id      Booking id to be modified
      * @return The modified {@link Booking}
      * @throws BookingNotFoundException if the id is not found in the DB
+     * @throws DeniedBookingOperationException if the status doesn't let the update 
      */
     Booking updateBooking(@Valid BookingControllerRequest request, long id);
+    Booking updateBooking(String fullName, String userEmail, LocalDate arrivalDate, LocalDate departureDate, long bo) ;
 
 }

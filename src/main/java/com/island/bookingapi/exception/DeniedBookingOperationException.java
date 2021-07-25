@@ -10,6 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@SuppressWarnings("serial")
 public class DeniedBookingOperationException extends RuntimeException {
 
     private int errorCode = ErrorCodes.ERROR_1001_DENIED_OPERATION;

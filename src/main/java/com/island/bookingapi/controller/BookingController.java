@@ -43,20 +43,20 @@ public class BookingController {
     @ApiResponses(value = { @ApiResponse(responseCode = "404", description = "id not found") })
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<BookingResponse> getBooking(@PathVariable @NotNull long id) {
+    public BookingResponse getBooking(@PathVariable @NotNull long id) {
 
 	Booking booking = this.bookingService.getBooking(id);
 	log.info("Booking for user {}", booking.getFullName());
-	return ResponseEntity.status(HttpStatus.OK).body(new BookingResponse(booking));
+	return new BookingResponse(booking);
     }
 
     @Operation(summary = "Create a new Booking with the provided details")
-    @ApiResponses(value = { @ApiResponse(responseCode = "400", description = "When booking dates are already booked") })
+    @ApiResponses(value = { @ApiResponse(responseCode = "400", description = "When booking dates are already booked or email has wrong format") })
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<BookingResponse> createBooking(@RequestBody @Valid BookingControllerRequest request) {
-	Booking newBooking = bookingService.create(request);
+	Booking newBooking = bookingService.createBooking(request.getFullName(), request.getUserEmail(), request.getArrivalDate(), request.getDepartureDate());
 
 	return ResponseEntity.status(HttpStatus.CREATED).body(new BookingResponse(newBooking));
     }
@@ -64,10 +64,10 @@ public class BookingController {
     @Operation(summary = "Cancel the Booking related with the recibed id")
     @ApiResponses(value = { @ApiResponse(responseCode = "404", description = "bookingId not found"),
 	    @ApiResponse(responseCode = "400", description = "Invalid booking status (other than ACTIVE") })
-    @DeleteMapping(value = "/{bookingId}")
-    public ResponseEntity<BookingResponse> cancelBooking(@PathVariable Long bookingId) {
-	Booking booking = this.bookingService.cancelBooking(bookingId);
-	return ResponseEntity.status(HttpStatus.OK).body(new BookingResponse(booking));
+    @DeleteMapping(value = "/{id}")
+    public BookingResponse cancelBooking(@PathVariable Long id) {
+	Booking booking = this.bookingService.cancelBooking(id);
+	return new BookingResponse(booking);
     }
 
     @Operation(summary = "Updates a Booking with the provided id")
@@ -77,11 +77,11 @@ public class BookingController {
     @PatchMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<BookingResponse> updateBooking(@RequestBody @Valid BookingControllerRequest request,
+    public BookingResponse updateBooking(@RequestBody @Valid BookingControllerRequest request,
 	    @PathVariable long id) {
 	Booking booking = this.bookingService.updateBooking(request, id);
 
-	return ResponseEntity.status(HttpStatus.OK).body(new BookingResponse(booking));
+	return new BookingResponse(booking);
     }
 
 }

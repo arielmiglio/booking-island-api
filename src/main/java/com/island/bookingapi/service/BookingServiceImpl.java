@@ -6,12 +6,15 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.island.bookingapi.exception.BookingNotFoundException;
 import com.island.bookingapi.exception.DeniedBookingOperationException;
+import com.island.bookingapi.exception.NotAvailablesDatesException;
 import com.island.bookingapi.model.Booking;
 import com.island.bookingapi.model.BookingStatus;
 import com.island.bookingapi.model.DateBooked;
@@ -36,34 +39,46 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Booking getBooking(long bookingId) {
 	log.info("Fetching booking by Id {}", bookingId);
-	return this.bookingRepository.findById(bookingId).orElseThrow(BookingNotFoundException::new);
+	return this.bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(bookingId));
     }
 
     @Override
     @Transactional
-    public Booking create(@Valid BookingControllerRequest request) {
+    public Booking createBooking(@Valid BookingControllerRequest request) {
 	log.info("Starting creation of a new Booking for the user {}", request.getFullName());
-	Booking booking = new Booking(request.getFullName(), request.getUserEmail(), request.getArrivalDate(),
-		request.getDepartureDate());
-	saveBooking(booking);
-
+	Booking booking = new Booking(request.getFullName(), request.getUserEmail(), request.getArrivalDate(), request.getDepartureDate());
+	this.saveBooking(booking);
 	log.info("Successfull Creation of a new Booking for the user {}", request.getFullName());
 	return booking;
     }
+    
+    @Override
+    @Transactional
+    public Booking createBooking(String fullName, String userEmail, LocalDate arrivalDate, LocalDate departureDate) {
+	log.info("Starting creation of a new Booking for the user {}", fullName);
+	Booking booking = new Booking(fullName, userEmail, arrivalDate, departureDate);
+	this.saveBooking(booking);
+	log.info("Successfull Creation of a new Booking for the user {}", fullName);
+	return booking;
+    }
+
 
     /**
-     * Create a collection of dates between arrival and departure dates to persist
-     * as BookedDate. Persist all BookedDates collected. Persist the booking
-     * received as parameter
+     * Create a collection of dates between arrival and departure dates to persist as BookedDate. 
+     * Persist all BookedDates collected. 
+     * Persist the booking received as parameter
      * 
      * @param booking
      */
     private void saveBooking(Booking booking) {
-	List<LocalDate> bookingDates = booking.getArrivalDate().datesUntil(booking.getDepartureDate())
-		.collect(Collectors.toList());
+	List<LocalDate> bookingDates = booking.getArrivalDate().datesUntil(booking.getDepartureDate()).collect(Collectors.toList());
 	List<DateBooked> datesToBooked = bookingDates.stream().map(DateBooked::new).collect(Collectors.toList());
-	this.dateBookedRepository.saveAll(datesToBooked);
-	// TODO VER SI CAPTURA LA CONSTRAINT EXCEPTION PARA ASEGURAR WRAPPEARLA
+	try {
+	    this.dateBookedRepository.saveAll(datesToBooked);
+	}catch (DataIntegrityViolationException e) {
+	    log.info("There are some booking dates overlaping existing ones");
+	    throw new NotAvailablesDatesException();
+	}
 
 	this.bookingRepository.save(booking);
     }
@@ -71,9 +86,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public Booking cancelBooking(Long bookingId) {
-	Booking booking = this.bookingRepository.findById(bookingId).orElseThrow(BookingNotFoundException::new);
-	List<LocalDate> bookingDates = booking.getArrivalDate().datesUntil(booking.getDepartureDate())
-		.collect(Collectors.toList());
+	Booking booking = this.bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(bookingId));
+	List<LocalDate> bookingDates = booking.getArrivalDate().datesUntil(booking.getDepartureDate()).collect(Collectors.toList());
 
 	booking.cancel();
 	this.dateBookedRepository.deleteByDayIn(bookingDates);
@@ -85,13 +99,20 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public Booking updateBooking(@Valid BookingControllerRequest request, long id) {
-	Booking booking = this.bookingRepository.findById(id).orElseThrow(BookingNotFoundException::new);
+	Booking booking = this.bookingRepository.findById(id).orElseThrow(() -> new BookingNotFoundException(id));
 
 	if (BookingStatus.ACTIVE != booking.getBookingStatus()) {
 	    throw new DeniedBookingOperationException(booking.getBookingStatus().toString());
 	}
 
-	this.workWithDates(booking, request.getArrivalDate(), request.getDepartureDate());
+	
+	try {
+	    this.workWithDates(booking, request.getArrivalDate(), request.getDepartureDate());
+	}catch (DataIntegrityViolationException e) {
+	    //catch the exception to throw another more specific 
+	    log.info("There are some booking dates overlaping existing ones");
+	    throw new NotAvailablesDatesException();
+	}
 	booking.setFullName(request.getFullName());
 	booking.setUserEmail(request.getUserEmail());
 
@@ -104,6 +125,7 @@ public class BookingServiceImpl implements BookingService {
      * 
      * The intersection is used to calculate new dates to insert and old ones to
      * delete from the database.
+     * Save the new ones and delete the old ones
      * 
      * @param booking
      * @param arrivalDate
@@ -116,13 +138,11 @@ public class BookingServiceImpl implements BookingService {
 	    return; // If the dates didn't change, is nothing to do
 	}
 
-	List<LocalDate> previousBookedDates = booking.getArrivalDate().datesUntil(booking.getDepartureDate())
-		.collect(Collectors.toList());
+	List<LocalDate> previousBookedDates = booking.getArrivalDate().datesUntil(booking.getDepartureDate()).collect(Collectors.toList());
 	List<LocalDate> newBookingDates = newArrivalDate.datesUntil(newDepartureDate).collect(Collectors.toList());
 
 	// Non existing dates in the original booking
-	List<LocalDate> toSave = newBookingDates.stream().filter(x -> !previousBookedDates.contains(x))
-		.collect(Collectors.toList());
+	List<LocalDate> toSave = newBookingDates.stream().filter(x -> !previousBookedDates.contains(x)).collect(Collectors.toList());
 	List<DateBooked> datesToSave = toSave.stream().map(DateBooked::new).collect(Collectors.toList());
 	this.dateBookedRepository.saveAll(datesToSave);
 
@@ -133,6 +153,29 @@ public class BookingServiceImpl implements BookingService {
 
 	booking.setArrivalDate(newArrivalDate);
 	booking.setDepartureDate(newDepartureDate);
+    }
+
+    @Override
+    public Booking updateBooking(String fullName, String userEmail, LocalDate arrivalDate, LocalDate departureDate, long bookingId) {
+	Booking booking = this.bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(bookingId));
+
+	if (BookingStatus.ACTIVE != booking.getBookingStatus()) {
+	    throw new DeniedBookingOperationException(booking.getBookingStatus().toString());
+	}
+
+	
+	try {
+	    this.workWithDates(booking, arrivalDate, departureDate);
+	}catch (DataIntegrityViolationException e) {
+	    //catch the exception to throw another more specific 
+	    log.info("There are some booking dates overlaping existing ones");
+	    throw new NotAvailablesDatesException();
+	}
+	booking.setFullName(fullName);
+	booking.setUserEmail(userEmail);
+
+	this.bookingRepository.save(booking);
+	return booking;
     }
 
 }
