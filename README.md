@@ -11,9 +11,11 @@ MySql Database must be installed
 * Create a new schema 
 * Customize application.properties in src/main/resources with next:
 
+```
     spring.datasource.url=jdbc:mysql://localhost:3306/<schema_name>
     spring.datasource.username=<user>
     spring.datasource.password=<password>
+```
 
 ### Run 
 ```
@@ -50,3 +52,8 @@ The error handling is implemented by throwing `RuntimeExeptions` handled by `Mai
  `@ControllerAdvice` that catched all uncaught exceptions before building the HTTP response. That way it's possible to
  centralize where the edge cases are handled taking advantage of SpringMVC features for converting exceptions into 
  HTTP Responses.
+ 
+ #### Concurrency
+ 
+ To avoid concurrency issues, a structure was created in which each date is persisted with a unique constraint. It allows controlling the overlapping dates by rejecting when it occurs.
+ 
