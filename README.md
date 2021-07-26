@@ -1,9 +1,6 @@
 # Booking API
 Rest API to manage bookings in Volcano Island
 
-![Java CI with Maven](https://github.com/arielmiglio/booking-island-api/workflows/Maven%Package.yml/badge.svg)
-
-
 ## Requirements 
 MySql Database must be installed
 
