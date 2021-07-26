@@ -1,28 +1,34 @@
 # Booking API
 Rest API to manage bookings in Volcano Island
 
-##Requirements 
+## Requirements 
 MySql Database must be installed
 
-##Run Application
+## Run Application
 
-###With MySql
+### MySql Configuration
     
 * Create a new schema 
-* Customize application.properties with next:
+* Customize application.properties in src/main/resources with next:
 
-    spring.datasource.url=jdbc:mysql://localhost:3306/<new_schema>
-    spring.datasource.username=<user_schema_name>
-    spring.datasource.password=<pass_eschema>
+    spring.datasource.url=jdbc:mysql://localhost:3306/<schema_name>
+    spring.datasource.username=<user>
+    spring.datasource.password=<password>
 
-###Run 
+### Run 
+```
     ./mvnw spring-boot:run
-    
-##Run Test Cases
-
+```
+ 
+## Run Test Cases
+```
     ./mvnw clean test
+```
+
+* The test cases runs over a H2 memory database. The configuration associated with it is in the source folder `src/test/resources/application.property`
 
 ## API Documentation
+
 You can find API endpoints documented in `{host}:{port}/api-docs.html`, where `host` and `port` values are related to where this app is running, in the case of runing it locally, try `http://localhost:8080/api-docs.html` 
 
 ## Implementation details

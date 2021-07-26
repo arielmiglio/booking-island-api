@@ -56,7 +56,7 @@ public class BookingController {
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<BookingResponse> createBooking(@RequestBody @Valid BookingControllerRequest request) {
-	Booking newBooking = bookingService.createBooking(request.getFullName(), request.getUserEmail(), request.getArrivalDate(), request.getDepartureDate());
+	Booking newBooking = bookingService.createBooking(request);
 
 	return ResponseEntity.status(HttpStatus.CREATED).body(new BookingResponse(newBooking));
     }
@@ -77,8 +77,7 @@ public class BookingController {
     @PatchMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public BookingResponse updateBooking(@RequestBody @Valid BookingControllerRequest request,
-	    @PathVariable long id) {
+    public BookingResponse updateBooking(@RequestBody @Valid BookingControllerRequest request, @PathVariable long id) {
 	Booking booking = this.bookingService.updateBooking(request, id);
 
 	return new BookingResponse(booking);

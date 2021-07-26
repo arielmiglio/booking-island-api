@@ -1,8 +1,6 @@
 package com.island.bookingapi.unit.test.controller;
 
-import static org.hamcrest.CoreMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.anything;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -11,15 +9,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 
-import javax.validation.Valid;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -38,6 +33,7 @@ import com.island.bookingapi.service.BookingService;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = BookingController.class)
+@AutoConfigureMockMvc
 public class BookingControllerTest {
     
     @Autowired
@@ -100,13 +96,8 @@ public class BookingControllerTest {
     
     @Test
     public void createBookingInAlreadyBookedDates() throws Exception {
-	String user = "Da Vinci Leonardo";
-	String email = "davincil@gmail.com";
-	LocalDate arrDate = LocalDate.now().plusDays(1);
-	LocalDate depDate = LocalDate.now().plusDays(3);
-	BookingControllerRequest request = new BookingControllerRequest(user, email, arrDate, depDate);
-	when(bookingServiceMock.createBooking(user, email, arrDate, depDate)).thenThrow(new NotAvailablesDatesException());
-	//when(bookingServiceMock.createBooking(request)).thenThrow(new NotAvailablesDatesException());
+	BookingControllerRequest request = new BookingControllerRequest("Da Vinci Leonardo", "davincil@gmail.com", LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
+	when(bookingServiceMock.createBooking(request)).thenThrow(new NotAvailablesDatesException());
 	
 	mockMvc.perform(post("/booking/")
 	                .contentType("application/json")
@@ -116,18 +107,15 @@ public class BookingControllerTest {
     
     @Test
     public void createBookingSuccessfully() throws Exception {
-	String user = "Da Vinci Leonardo";
-	String email = "davincil@gmail.com";
-	LocalDate arrDate = LocalDate.now().plusDays(1);
-	LocalDate depDate = LocalDate.now().plusDays(3);
-	BookingControllerRequest request = new BookingControllerRequest(user, email, arrDate, depDate);
+	BookingControllerRequest request = new BookingControllerRequest("Da Vinci Leonardo", "davincil@gmail.com", LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
 	
-	when(bookingServiceMock.createBooking(user, email, arrDate, depDate)).thenReturn(booking);
+	when(bookingServiceMock.createBooking(request)).thenReturn(booking);
 	mockMvc.perform(post("/booking/")
         		.contentType("application/json")
         		.content(objectMapper.writeValueAsString(request)))
         		.andExpect(status().isCreated());
     }
+    
     
     //CANCELATION BOOKING TEST CASES
     @Test
@@ -162,19 +150,21 @@ public class BookingControllerTest {
     @Test
     public void updateBookingSuccessfully() throws Exception {
 	BookingControllerRequest request = new BookingControllerRequest("Da Vinci Leonardo", "davincil@gmail.com", LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
-	long bookingId = 1l;
+	Long bookingId = 1l;
 	when(bookingServiceMock.updateBooking(request, bookingId)).thenReturn(booking);
-	mockMvc.perform(patch("/booking/{id}", 1)
+	mockMvc.perform(patch("/booking/" + bookingId)
         		.contentType("application/json")
         		.content(objectMapper.writeValueAsString(request)))
-        		.andExpect(status().isCreated());
+        		.andExpect(status().isOk());
     }
+    
     
     @Test
     public void updateBookingOnUnavailableDate_ShouldFail() throws Exception {
 	BookingControllerRequest request = new BookingControllerRequest("Da Vinci Leonardo", "davincil@gmail.com", LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
-	long bookingId = 1l;
-	when(bookingServiceMock.updateBooking(request,bookingId)).thenThrow(new NotAvailablesDatesException());
+	
+	Long bookingId = 1l;
+	when(bookingServiceMock.updateBooking(request, bookingId)).thenThrow(new NotAvailablesDatesException());
 	mockMvc.perform(patch("/booking/{id}", bookingId)
         		.contentType("application/json")
         		.content(objectMapper.writeValueAsString(request)))
@@ -184,15 +174,11 @@ public class BookingControllerTest {
     
     @Test
     public void updateBookingWrongId_ShouldFail() throws Exception {
-	//BookingControllerRequest request = new BookingControllerRequest("Da Vinci Leonardo", "davincil@gmail.com", LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
+	BookingControllerRequest request = new BookingControllerRequest("Da Vinci Leonardo", "davincil@gmail.com", LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
 	long bookingId = 1l;
-	String user = "Da Vinci Leonardo";
-	String email = "davincil@gmail.com";
-	LocalDate arrDate = LocalDate.now().plusDays(1);
-	LocalDate depDate = LocalDate.now().plusDays(3);
-	BookingControllerRequest request = new BookingControllerRequest(user, email, arrDate, depDate);
-	when(bookingServiceMock.updateBooking(user, email, arrDate, depDate, bookingId)).thenThrow(new BookingNotFoundException(bookingId));
-	//when(bookingServiceMock.updateBooking((@Valid BookingControllerRequest) any(BookingControllerRequest.class), bookingId)).thenThrow(new BookingNotFoundException(bookingId));
+	
+	when(bookingServiceMock.updateBooking(request, bookingId)).thenThrow(new BookingNotFoundException(bookingId));
+
 	mockMvc.perform(patch("/booking/{id}", bookingId)
         		.contentType("application/json")
         		.content(objectMapper.writeValueAsString(request)))
@@ -202,15 +188,10 @@ public class BookingControllerTest {
     
     @Test
     public void updateNonActiveBooking_ShouldFail() throws Exception {
-	//BookingControllerRequest request = new BookingControllerRequest("Da Vinci Leonardo", "davincil@gmail.com", LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
+	BookingControllerRequest request = new BookingControllerRequest("Da Vinci Leonardo", "davincil@gmail.com", LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
 	long bookingId = 1l;
-	String user = "Da Vinci Leonardo";
-	String email = "davincil@gmail.com";
-	LocalDate arrDate = LocalDate.now().plusDays(1);
-	LocalDate depDate = LocalDate.now().plusDays(3);
-	BookingControllerRequest request = new BookingControllerRequest(user, email, arrDate, depDate);
-	when(bookingServiceMock.createBooking(user, email, arrDate, depDate)).thenThrow(new DeniedBookingOperationException(BookingStatus.CANCELLED.toString()));
-	//when(bookingServiceMock.updateBooking(request, bookingId)).thenThrow(new DeniedBookingOperationException(BookingStatus.CANCELLED.toString()));
+
+	when(bookingServiceMock.updateBooking(request, bookingId)).thenThrow(new DeniedBookingOperationException(BookingStatus.CANCELLED.toString()));
 	mockMvc.perform(patch("/booking/{id}", bookingId)
         		.contentType("application/json")
         		.content(objectMapper.writeValueAsString(request)))

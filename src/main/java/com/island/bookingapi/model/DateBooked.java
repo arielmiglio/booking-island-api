@@ -16,11 +16,9 @@ import lombok.Setter;
  * 
  * @author miglioa
  *
- *         This class is used to instance each date that has concrete bookings.
- *         Being the ID the only attribute cannot be able to persist two
- *         instances with in the same day It become the class a constraint to
- *         avoid insert duplicated bookings days.
- * 
+ *         This class is used to persist each date that has a concreted booking.
+ *         Being the column day annotated with unique = true, avoid insert duplicated bookings days.
+ *         Is used to resolve concurrency request 
  */
 @Entity
 @Getter

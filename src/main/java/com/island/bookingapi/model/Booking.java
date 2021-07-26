@@ -26,6 +26,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * 
+ * @author miglioa
+ *	This class modeled a booking. It has the business logic associated with rules to let make a booking    
+ */
 @Entity
 @Getter
 @Setter
@@ -77,6 +82,13 @@ public class Booking {
 	this.bookingStatus = BookingStatus.CANCELLED;
     }
     
+    /**
+     * Checks all the constraints associated with the creation of a Booking
+     * @param name
+     * @param email
+     * @param arrival
+     * @param departure
+     */
     private void validateBooking(String name, String email, LocalDate arrival, LocalDate departure) {
 	if (arrival == null || departure == null) {
 	    throw new DatesMustNotBeNullException("It must be specified arribal and departure dates");

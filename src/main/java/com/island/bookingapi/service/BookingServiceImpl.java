@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -52,15 +51,6 @@ public class BookingServiceImpl implements BookingService {
 	return booking;
     }
     
-    @Override
-    @Transactional
-    public Booking createBooking(String fullName, String userEmail, LocalDate arrivalDate, LocalDate departureDate) {
-	log.info("Starting creation of a new Booking for the user {}", fullName);
-	Booking booking = new Booking(fullName, userEmail, arrivalDate, departureDate);
-	this.saveBooking(booking);
-	log.info("Successfull Creation of a new Booking for the user {}", fullName);
-	return booking;
-    }
 
 
     /**
@@ -155,27 +145,5 @@ public class BookingServiceImpl implements BookingService {
 	booking.setDepartureDate(newDepartureDate);
     }
 
-    @Override
-    public Booking updateBooking(String fullName, String userEmail, LocalDate arrivalDate, LocalDate departureDate, long bookingId) {
-	Booking booking = this.bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(bookingId));
-
-	if (BookingStatus.ACTIVE != booking.getBookingStatus()) {
-	    throw new DeniedBookingOperationException(booking.getBookingStatus().toString());
-	}
-
-	
-	try {
-	    this.workWithDates(booking, arrivalDate, departureDate);
-	}catch (DataIntegrityViolationException e) {
-	    //catch the exception to throw another more specific 
-	    log.info("There are some booking dates overlaping existing ones");
-	    throw new NotAvailablesDatesException();
-	}
-	booking.setFullName(fullName);
-	booking.setUserEmail(userEmail);
-
-	this.bookingRepository.save(booking);
-	return booking;
-    }
-
+    
 }

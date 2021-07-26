@@ -1,12 +1,11 @@
 package com.island.bookingapi.service;
 
-import java.time.LocalDate;
-
 import javax.validation.Valid;
 
 import com.island.bookingapi.exception.AlreadyCancelledBookingException;
 import com.island.bookingapi.exception.BookingNotFoundException;
 import com.island.bookingapi.exception.DeniedBookingOperationException;
+import com.island.bookingapi.exception.NotAvailablesDatesException;
 import com.island.bookingapi.model.Booking;
 import com.island.bookingapi.request.BookingControllerRequest;
 
@@ -31,7 +30,7 @@ public interface BookingService {
      * @throws NotAvailablesDatesException when dates are not available to booking
      */
     Booking createBooking(@Valid BookingControllerRequest request);
-    Booking createBooking(String fullName, String userEmail, LocalDate arrivalDate, LocalDate departureDate) ;
+    
 
     /**
      * Cancel a booking changing its status to CANCELLED
@@ -53,6 +52,6 @@ public interface BookingService {
      * @throws DeniedBookingOperationException if the status doesn't let the update 
      */
     Booking updateBooking(@Valid BookingControllerRequest request, long id);
-    Booking updateBooking(String fullName, String userEmail, LocalDate arrivalDate, LocalDate departureDate, long bo) ;
+    
 
 }
