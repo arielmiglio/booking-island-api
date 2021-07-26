@@ -55,5 +55,5 @@ The error handling is implemented by throwing `RuntimeExeptions` handled by `Mai
  
  #### Concurrency
  
- To avoid concurrency issues, a structure was created in which each date is persisted with a unique constraint. It allows controlling the overlapping dates by rejecting when it occurs.
+ To avoid concurrency issues, a structure was created in which each date is persisted with a unique constraint. It allows controlling the overlapping dates by rejecting when it occurs. See BookedDate Class and BookedDateService.
  
