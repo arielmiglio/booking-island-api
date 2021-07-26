@@ -1,5 +1,6 @@
 # Booking API
 Rest API to manage bookings in Volcano Island
+![Java CI with Maven](https://github.com/arielmiglio/booking-island-api/workflows/Java%20CI%20with%20Maven/badge.svg)
 
 ## Requirements 
 MySql Database must be installed
@@ -46,7 +47,7 @@ The application basically have different layers:
 - **Controller**: where all the REST endpoints are defined. It's based in Spring MVC
 - **Service**: middle tier to let the controllers interact with the model and the repository
 - **Repository**: the repository abstraction which implementation based on Spring Data 
-- **Model**: the domain. All the business rules and game logic is there.
+- **Model**: the domain. All the business rules and booking logic is there.
 
 The error handling is implemented by throwing `RuntimeExeptions` handled by `MainExceptionHandler` which is a 
  `@ControllerAdvice` that catched all uncaught exceptions before building the HTTP response. That way it's possible to
