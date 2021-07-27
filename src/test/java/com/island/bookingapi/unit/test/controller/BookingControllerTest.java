@@ -72,6 +72,7 @@ public class BookingControllerTest {
                 		.andExpect(status().isNotFound());
     }
     
+    //CREATION BOOKING TEST CASES
     @Test
     public void createBookingWithWrongMail() throws Exception {
 	BookingControllerRequest request = new BookingControllerRequest("Da Vinci Leonardo", "davincil", LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
@@ -82,7 +83,6 @@ public class BookingControllerTest {
 	                .andExpect(status().isBadRequest());
     }
     
-    //CREATION BOOKING TEST CASES
     @Test
     public void createBookingWithEmptyFullName() throws Exception {
 	BookingControllerRequest request = new BookingControllerRequest("", "davincil", LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
