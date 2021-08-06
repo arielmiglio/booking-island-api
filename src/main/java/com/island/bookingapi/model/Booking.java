@@ -28,8 +28,8 @@ import lombok.Setter;
 
 /**
  * 
- * @author miglioa
- *	This class modeled a booking. It has the business logic associated with rules to let make a booking    
+ * @author miglioa This class modeled a booking. It has the business logic
+ *         associated with rules to let make a booking
  */
 @Entity
 @Getter
@@ -37,81 +37,82 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Booking {
 
-    public static final Integer MAX_STAY = 3;
-    public static final Integer BOOKING_ANTICIPATION_MONTHS = 1;
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	public static final Integer MAX_STAY = 3;
+	public static final Integer BOOKING_ANTICIPATION_MONTHS = 1;
 
-    @NotBlank
-    @Column(length = 300)
-    private String fullName;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Email
-    @NotBlank
-    private String userEmail;
+	@NotBlank
+	@Column(length = 300)
+	private String fullName;
 
-    private LocalDate arrivalDate;
+	@Email
+	@NotBlank
+	private String userEmail;
 
-    private LocalDate departureDate;
+	private LocalDate arrivalDate;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+	private LocalDate departureDate;
 
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+	@CreationTimestamp
+	private LocalDateTime createdAt;
 
-    private BookingStatus bookingStatus;
-    
-    
+	@UpdateTimestamp
+	private LocalDateTime updatedAt;
 
-    public Booking(String name, String email, LocalDate arrivalDate, LocalDate departureDate) {
-	this.validateBooking(name, email, arrivalDate, departureDate);
-	this.fullName = name;
-	this.userEmail = email;
-	this.arrivalDate = arrivalDate;
-	this.departureDate = departureDate;
-	this.bookingStatus = BookingStatus.ACTIVE;
-    }
+	private BookingStatus bookingStatus;
 
-    public void cancel() {
-	if (BookingStatus.CANCELLED == this.bookingStatus) {
-	    throw new AlreadyCancelledBookingException(this.id);
-	}
-	this.bookingStatus = BookingStatus.CANCELLED;
-    }
-    
-    /**
-     * Checks all the constraints associated with the creation of a Booking
-     * @param name
-     * @param email
-     * @param arrival
-     * @param departure
-     */
-    private void validateBooking(String name, String email, LocalDate arrival, LocalDate departure) {
-	if (arrival == null || departure == null) {
-	    throw new DatesMustNotBeNullException("It must be specified arribal and departure dates");
+	public Booking(String name, String email, LocalDate arrivalDate, LocalDate departureDate) {
+		this.validateBooking(name, email, arrivalDate, departureDate);
+		this.fullName = name;
+		this.userEmail = email;
+		this.arrivalDate = arrivalDate;
+		this.departureDate = departureDate;
+		this.bookingStatus = BookingStatus.ACTIVE;
 	}
 
-	if (arrival.isAfter(departure) || arrival.isEqual(departure)) {
-	    throw new SameDaysNotAllowedException("Arraival and departure can not be the same");
+	public void cancel() {
+		if (BookingStatus.CANCELLED == this.bookingStatus) {
+			throw new AlreadyCancelledBookingException(this.id);
+		}
+		this.bookingStatus = BookingStatus.CANCELLED;
 	}
 
-	if (ChronoUnit.DAYS.between(arrival, departure) > MAX_STAY) {
-	    throw new MaximunStayException("The maximum stay is"+ MAX_STAY +"days");
-	}
-	
-	LocalDate now = LocalDate.now();
-	if (now.compareTo(arrival) == 0) {
-	    throw new TodayNotAllowedException("Arrival date must be greater today");
-	}
-	
-	LocalDate limitLocalDate = now.plusMonths(BOOKING_ANTICIPATION_MONTHS);
-	if (limitLocalDate.compareTo(arrival) < 0) {
-	    throw new MaximunArrivalDateExceededException(String.format("Arrival date must be less than %s", limitLocalDate.toString()));
-	}
+	/**
+	 * Checks all the constraints associated with the creation of a Booking
+	 * 
+	 * @param name
+	 * @param email
+	 * @param arrival
+	 * @param departure
+	 */
+	private void validateBooking(String name, String email, LocalDate arrival, LocalDate departure) {
+		if (arrival == null || departure == null) {
+			throw new DatesMustNotBeNullException("It must be specified arribal and departure dates");
+		}
 
-    }
+		if (arrival.isAfter(departure) || arrival.isEqual(departure)) {
+			throw new SameDaysNotAllowedException(
+					"Arraival and departure can not be the same and arraival must be lower than departure");
+		}
+
+		if (ChronoUnit.DAYS.between(arrival, departure) > MAX_STAY) {
+			throw new MaximunStayException("The maximum stay is" + MAX_STAY + "days");
+		}
+
+		LocalDate now = LocalDate.now();
+		if (now.compareTo(arrival) == 0) {
+			throw new TodayNotAllowedException("Arrival date must be greater today");
+		}
+
+		LocalDate limitLocalDate = now.plusMonths(BOOKING_ANTICIPATION_MONTHS);
+		if (limitLocalDate.compareTo(arrival) < 0) {
+			throw new MaximunArrivalDateExceededException(
+					String.format("Arrival date must be less than %s", limitLocalDate.toString()));
+		}
+
+	}
 
 }
