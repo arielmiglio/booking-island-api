@@ -1,5 +1,5 @@
 # Booking API
-Rest API to manage bookings in Volcano Island
+Rest API to manage bookings in Volcano Island -
 
 ## Requirements 
 MySql Database must be installed
